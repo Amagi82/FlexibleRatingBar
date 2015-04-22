@@ -100,9 +100,16 @@ public class FlexibleRatingBar extends RatingBar {
         setMeasuredDimension(width, height);
     }
 
-    //Create a star polygon with any number of points, down to 2, which creates a diamond
+    //Create a star polygon with any number of points, down to 2, which creates a diamond, and 0, which creates a circle
     //Don't alter anything besides radius or path.offset in here
     private Path createStarBySize(float size, int steps, float offset) {
+        //draw a simple circle if steps == 0
+        if(steps == 0){
+            path.addOval(new RectF(offset, 0F, offset + size, size), Path.Direction.CW);
+            path.offset(0, (size*.05F));
+            path.close();
+            return path;
+        }
         float halfSize = size / 2.0F;
         float radius = halfSize / 2.2F; //Adjusts "roundness" of stars
         float degreesPerStep = (float) Math.toRadians(360.0F / (float) steps);

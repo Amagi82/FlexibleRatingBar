@@ -19,9 +19,12 @@
 package amagi82.sample;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import amagi82.flexibleratingbar.FlexibleRatingBar;
 
 
 public class MainActivity extends Activity {
@@ -30,6 +33,18 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FlexibleRatingBar ratingBar = (FlexibleRatingBar) findViewById(R.id.flexibleRatingBar);
+        FlexibleRatingBar ratingBar2 = (FlexibleRatingBar) findViewById(R.id.flexibleRatingBar2);
+        FlexibleRatingBar ratingBar3 = (FlexibleRatingBar) findViewById(R.id.flexibleRatingBar3);
+        FlexibleRatingBar ratingBar4 = (FlexibleRatingBar) findViewById(R.id.flexibleRatingBar4);
+
+        ratingBar2.setPolygonVertices(0);
+        ratingBar3.setPolygonVertices(4);
+        ratingBar3.setStrokeWidth(5);
+        ratingBar4.setPolygonVertices(6);
+        ratingBar4.setColorFillOn(Color.rgb(111,63,182));
+        ratingBar4.setColorFillOff(Color.argb(55,145,122,235));
     }
 
 
