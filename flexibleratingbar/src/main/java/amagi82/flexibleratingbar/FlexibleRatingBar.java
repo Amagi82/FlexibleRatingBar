@@ -17,6 +17,7 @@
 package amagi82.flexibleratingbar;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -39,7 +40,7 @@ public class FlexibleRatingBar extends RatingBar {
     private int colorFillPressedOn = Color.rgb(0xFF,0xB7,0x4D);
     private int colorFillPressedOff = Color.TRANSPARENT;
     private int polygonVertices = 5;
-    private int polygonRotation = 54;
+    private int polygonRotation = 54; //measured in degrees
     private Integer strokeWidth; //width of the outline
     private Paint paintInside = new Paint();
     private Paint paintOutline = new Paint();
@@ -49,10 +50,12 @@ public class FlexibleRatingBar extends RatingBar {
 
     public FlexibleRatingBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        getXmlAttrs(context, attrs);
     }
 
     public FlexibleRatingBar(Context context, AttributeSet attrs) {
         super(context, attrs);
+        getXmlAttrs(context, attrs);
     }
 
     public FlexibleRatingBar(Context context) {
@@ -208,6 +211,26 @@ public class FlexibleRatingBar extends RatingBar {
         comboImage.drawBitmap(s, c.getWidth(), 0f,null);
 
         return colorsJoined;
+    }
+
+    //Set any XML attributes that may have been specified
+    private void getXmlAttrs(Context context, AttributeSet attrs) {
+        TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.FlexibleRatingBar, 0, 0);
+        try {
+            colorOutlineOn = a.getInteger(R.styleable.FlexibleRatingBar_colorOutlineOn, Color.rgb(0x11, 0x11, 0x11));
+            colorOutlineOff = a.getInteger(R.styleable.FlexibleRatingBar_colorOutlineOff, Color.rgb(0x61,0x61,0x61));
+            colorOutlinePressed = a.getInteger(R.styleable.FlexibleRatingBar_colorOutlinePressed, Color.rgb(0xFF,0xB7,0x4D));
+            colorFillOn = a.getInteger(R.styleable.FlexibleRatingBar_colorFillOn, Color.rgb(0xFF,0x98,0x00));
+            colorFillOff = a.getInteger(R.styleable.FlexibleRatingBar_colorFillOff, Color.TRANSPARENT);
+            colorFillPressedOn = a.getInteger(R.styleable.FlexibleRatingBar_colorFillPressedOn, Color.rgb(0xFF,0xB7,0x4D));
+            colorFillPressedOff = a.getInteger(R.styleable.FlexibleRatingBar_colorFillPressedOff, Color.TRANSPARENT);
+            polygonVertices = a.getInteger(R.styleable.FlexibleRatingBar_polygonVertices, 5);
+            polygonRotation = 54 + a.getInteger(R.styleable.FlexibleRatingBar_polygonRotation, 0);
+            strokeWidth = a.getInteger(R.styleable.FlexibleRatingBar_strokeWidth, -50);
+            if(strokeWidth < 0) strokeWidth = null;
+        } finally {
+            a.recycle();
+        }
     }
 
     public void setColorOutlineOn(int colorOutlineOn) {

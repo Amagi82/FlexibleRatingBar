@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
         FlexibleRatingBar ratingBar2 = (FlexibleRatingBar) findViewById(R.id.flexibleRatingBar2);
         FlexibleRatingBar ratingBar3 = (FlexibleRatingBar) findViewById(R.id.flexibleRatingBar3);
         FlexibleRatingBar ratingBar4 = (FlexibleRatingBar) findViewById(R.id.flexibleRatingBar4);
+        FlexibleRatingBar ratingBar5 = (FlexibleRatingBar) findViewById(R.id.flexibleRatingBar5);
 
         ratingBar2.setPolygonVertices(0);
         ratingBar3.setPolygonVertices(4);

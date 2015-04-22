@@ -17,6 +17,7 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -46,15 +47,32 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:numStars="6"
-        android:rating="2.5"
-        android:stepSize="0.5" />
+        android:rating="4.5"
+        android:stepSize="0.1" />
 
     <amagi82.flexibleratingbar.FlexibleRatingBar
         android:id="@+id/flexibleRatingBar4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:numStars="8"
-        android:rating="2.5"
+        android:rating="5.5"
         android:stepSize="0.5" />
+
+    <amagi82.flexibleratingbar.FlexibleRatingBar
+        android:id="@+id/flexibleRatingBar5"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:numStars="3"
+        android:rating="1.5"
+        android:stepSize="0.5"
+        app:colorFillOff="@android:color/transparent"
+        app:colorFillOn="@color/tealA400"
+        app:colorFillPressedOff="@android:color/transparent"
+        app:colorFillPressedOn="@color/tealA200"
+        app:colorOutlineOff="@color/teal800"
+        app:colorOutlineOn="@color/teal900"
+        app:colorOutlinePressed="@color/teal500"
+        app:polygonVertices="7"
+        app:strokeWidth="10"/>
 
 </LinearLayout>
