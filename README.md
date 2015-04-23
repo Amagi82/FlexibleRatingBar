@@ -43,7 +43,7 @@ FlexibleRatingBar should work all the way back to 2.3, and possibly earlier than
   app:polygonRotation="0"
   app:strokeWidth="5dp"/>
 ```
-Simply add `<amagi82.flexibleratingbar.FlexibleRatingBar/>` to your layout, and use the same as you would any other widget, only with proper scaling. 
+Simply add `<amagi82.flexibleratingbar.FlexibleRatingBar/>` to your layout, and use the same as you would any other widget. 
 `layout_width` and `layout_height` will scale the rating bar appropriately. 
 In addition, you can alter any of the above settings in xml, or do it in code. 
 The colors should be self-explanitory. `polygonVertices` is the number of points on your star. 
