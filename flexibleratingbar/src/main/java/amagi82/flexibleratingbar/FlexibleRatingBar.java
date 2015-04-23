@@ -134,8 +134,7 @@ public class FlexibleRatingBar extends RatingBar {
         //If starSize matches getHeight, the tips of the star can get cut off due to strokeWidth being added to the polygon size.
         //Make it a bit smaller to avoid this. Also decrease star size and spread them out rather than cutting them off if the
         //height is insufficient for the width.
-        float starSize = getHeight();
-        if(starSize > getWidth()/getNumStars()) starSize = getWidth()/getNumStars();
+        float starSize = Math.min(getHeight(), getWidth()/getNumStars());
         if (strokeWidth < 0 ) strokeWidth = (int)(starSize/15);
         starSize -= strokeWidth;
 
@@ -148,32 +147,24 @@ public class FlexibleRatingBar extends RatingBar {
         paintOutline.setAntiAlias(true);
 
         //Default RatingBar changes color when pressed. This replicates the effect.
-        if(isPressed()){
-            paintInside.setShader(shaderFillPressed);
-        }else{
-            paintInside.setShader(shaderFill);
-        }
+        paintInside.setShader(isPressed()? shaderFillPressed : shaderFill);
 
-        //Default RatingBar only shows fractions in the interior fill, not the outline.
-        int colorOutline;
+        path.rewind();
+        path = createStarBySize(starSize, polygonVertices);
+
+        //Rotate star if desired, and resize to fit the available area. Height and width may change during rotation.
+        //Other shapes may not be in desirable orientations, but you can rotate them with setPolygonRotation
+        path.computeBounds(rectangle,  true);
+        float maxDimension = Math.max(rectangle.height(), rectangle.width());
+        matrix.setScale(starSize / (1.15F * maxDimension), starSize / (1.15F * maxDimension));
+        if(polygonRotation != 0) matrix.preRotate(polygonRotation);
+        path.transform(matrix);
+
         for (int i=0;i<getNumStars();++i) {
-            if(isPressed()){
-                colorOutline = colorOutlinePressed;
-            }else colorOutline = i < getRating() ? colorOutlineOn : colorOutlineOff;
-            paintOutline.setColor(colorOutline);
+            //Default RatingBar only shows fractions in the interior, not the outline.
+            paintOutline.setColor(isPressed()?  colorOutlinePressed : i<getRating()? colorOutlineOn : colorOutlineOff);
 
-            path.rewind();
-            path = createStarBySize(starSize, polygonVertices);
-
-            //Rotate star if desired, and resize to fit the available area. Height and width may change during rotation.
-            //Other shapes may not be in desirable orientations, but you can rotate them with setPolygonRotation
             path.computeBounds(rectangle,  true);
-            float maxDimension = Math.max(rectangle.height(), rectangle.width());
-            matrix.setScale(starSize / (1.15F * maxDimension), starSize / (1.15F * maxDimension));
-            if(polygonRotation != 0) matrix.preRotate(polygonRotation);
-            path.transform(matrix);
-            path.computeBounds(rectangle,  true);
-
             path.offset((i+.5F)*getWidth()/getNumStars() - rectangle.centerX(), getHeight()/2 - rectangle.centerY());
             canvas.drawPath(path, paintInside);
             canvas.drawPath(path, paintOutline);
@@ -203,12 +194,12 @@ public class FlexibleRatingBar extends RatingBar {
     }
 
     //Combine two bitmaps side by side for use as a BitmapShader
-    private Bitmap combineBitmaps(Bitmap c, Bitmap s) {
-        colorsJoined = Bitmap.createBitmap(c.getWidth() + s.getWidth(), c.getHeight(), Bitmap.Config.ARGB_8888);
+    private Bitmap combineBitmaps(Bitmap leftBitmap, Bitmap rightBitmap) {
+        colorsJoined = Bitmap.createBitmap(leftBitmap.getWidth() + rightBitmap.getWidth(), leftBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
         Canvas comboImage = new Canvas(colorsJoined);
-        comboImage.drawBitmap(c, 0f, 0f, null);
-        comboImage.drawBitmap(s, c.getWidth(), 0f,null);
+        comboImage.drawBitmap(leftBitmap, 0f, 0f, null);
+        comboImage.drawBitmap(rightBitmap, leftBitmap.getWidth(), 0f, null);
 
         return colorsJoined;
     }
