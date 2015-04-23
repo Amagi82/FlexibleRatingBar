@@ -51,7 +51,7 @@ You can go down to 2, which creates a diamond, or enter 0 and get circles.
 By default, polygons are drawn with one point centered at the top. `polygonRotation` rotates it by int degrees. 
 `strokeWidth` is the thickness of the outline around the star.
 
-In code, you can change any of the above with `myRatingBar.setColorFillOff` and so on. 
+In code, you can change any of the above with `myRatingBar.setColorFillOff(Color.argb(55,145,122,235))` and so on. 
 In addition, you can call `setInteriorAngleModifier`, which adjusts the interior angle of the polygons. 
 Default is 2.2, and I recommend keeping it between 1(round) and 3(very pointy).  
 
