@@ -40,12 +40,15 @@ public class FlexibleRatingBar extends RatingBar {
     private int colorFillPressedOn = Color.rgb(0xFF,0xB7,0x4D);
     private int colorFillPressedOff = Color.TRANSPARENT;
     private int polygonVertices = 5;
-    private int polygonRotation = 54; //measured in degrees
-    private Integer strokeWidth; //width of the outline
+    private int polygonRotation = 0; //measured in degrees
+    private int strokeWidth; //width of the outline
     private Paint paintInside = new Paint();
     private Paint paintOutline = new Paint();
     private Bitmap colorsJoined;
     private Path path = new Path();
+    private RectF rectangle = new RectF();
+    private Matrix matrix = new Matrix();
+    private float interiorAngleModifier = 2.2F;
     private float dp = getResources().getDisplayMetrics().density;
 
     public FlexibleRatingBar(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -64,9 +67,7 @@ public class FlexibleRatingBar extends RatingBar {
 
     @Override
     protected synchronized void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        float spacing = 0.9F;
         int desiredWidth = (int)(50 * dp * getNumStars());
-
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
@@ -93,47 +94,36 @@ public class FlexibleRatingBar extends RatingBar {
             height = heightSize;
         } else if (heightMode == MeasureSpec.AT_MOST) {
             //Can't be bigger than...
-            height = Math.min(heightSize, (int) (width/getNumStars() * spacing));
+            height = Math.min(heightSize, width/getNumStars());
         } else {
             //Be whatever you want
-            height = (int) (width/getNumStars() * spacing);
+            height = width/getNumStars();
         }
 
         //MUST CALL THIS
         setMeasuredDimension(width, height);
     }
 
-    //Create a star polygon with any number of points, down to 2, which creates a diamond, and 0, which creates a circle
-    //Don't alter anything besides radius or path.offset in here
-    private Path createStarBySize(float size, int steps, float offset) {
+    //Create a star polygon with any number of vertices, down to 2, which creates a diamond
+    //If you enter 0 vertices, you get a circle
+    private Path createStarBySize(float size, int steps) {
         //draw a simple circle if steps == 0
         if(steps == 0){
-            path.addOval(new RectF(offset, 0F, offset + size, size), Path.Direction.CW);
-            path.offset(0, (size*.05F));
+            path.addOval(new RectF(0, 0, size, size), Path.Direction.CW);
             path.close();
             return path;
         }
         float halfSize = size / 2.0F;
-        float radius = halfSize / 2.2F; //Adjusts "roundness" of stars
+        float radius = halfSize / interiorAngleModifier; //Adjusts "pointiness" of stars
         float degreesPerStep = (float) Math.toRadians(360.0F / (float) steps);
         float halfDegreesPerStep = degreesPerStep / 2.0F;
         path.setFillType(Path.FillType.EVEN_ODD);
         float max = (float) (2.0F* Math.PI);
-        path.moveTo(offset + size, halfSize);
+        path.moveTo(halfSize, 0);
         for (double step = 0; step < max; step += degreesPerStep) {
-            path.lineTo((float)(offset+(halfSize + halfSize * Math.cos(step))), (float)(halfSize + halfSize * Math.sin(step)));
-            path.lineTo((float)(offset+(halfSize + radius * Math.cos(step + halfDegreesPerStep))), (float)(halfSize + radius * Math.sin(step + halfDegreesPerStep)));
+            path.lineTo((float)(halfSize - halfSize * Math.sin(step)), (float)(halfSize - halfSize * Math.cos(step)));
+            path.lineTo((float)(halfSize - radius * Math.sin(step + halfDegreesPerStep)), (float)(halfSize - radius * Math.cos(step + halfDegreesPerStep)));
         }
-        //Change offset or starSize if your star is getting cut off
-        path.offset(-size*.02F, (size*.1F));
-
-        //Rotate 5-pointed star to vertical. Other shapes may not be in desirable orientations, but you can rotate them with setPolygonRotation
-        Matrix matrix = new Matrix();
-        RectF bounds = new RectF();
-        path.computeBounds(bounds, true);
-        matrix.postRotate(polygonRotation, bounds.centerX(), bounds.centerY());
-        path.transform(matrix);
-
         path.close();
         return path;
     }
@@ -146,8 +136,8 @@ public class FlexibleRatingBar extends RatingBar {
         //height is insufficient for the width.
         float starSize = getHeight();
         if(starSize > getWidth()/getNumStars()) starSize = getWidth()/getNumStars();
-        starSize *= 0.9;
-        if (strokeWidth == null) strokeWidth = (int)(starSize/12);
+        if (strokeWidth < 0 ) strokeWidth = (int)(starSize/15);
+        starSize -= strokeWidth;
 
         BitmapShader shaderFill = createShader(colorFillOn, colorFillOff);
         BitmapShader shaderFillPressed = createShader(colorFillPressedOn, colorFillPressedOff);
@@ -164,7 +154,7 @@ public class FlexibleRatingBar extends RatingBar {
             paintInside.setShader(shaderFill);
         }
 
-        //Default RatingBar only shows fractions in the filling, not the outline.
+        //Default RatingBar only shows fractions in the interior fill, not the outline.
         int colorOutline;
         for (int i=0;i<getNumStars();++i) {
             if(isPressed()){
@@ -172,9 +162,19 @@ public class FlexibleRatingBar extends RatingBar {
             }else colorOutline = i < getRating() ? colorOutlineOn : colorOutlineOff;
             paintOutline.setColor(colorOutline);
 
-            path.reset();
-            path = createStarBySize(starSize, polygonVertices, i*(getWidth()/getNumStars()) + (getWidth()/getNumStars()-starSize)/2);
+            path.rewind();
+            path = createStarBySize(starSize, polygonVertices);
 
+            //Rotate star if desired, and resize to fit the available area. Height and width may change during rotation.
+            //Other shapes may not be in desirable orientations, but you can rotate them with setPolygonRotation
+            path.computeBounds(rectangle,  true);
+            float maxDimension = Math.max(rectangle.height(), rectangle.width());
+            matrix.setScale(starSize / (1.15F * maxDimension), starSize / (1.15F * maxDimension));
+            if(polygonRotation != 0) matrix.preRotate(polygonRotation);
+            path.transform(matrix);
+            path.computeBounds(rectangle,  true);
+
+            path.offset((i+.5F)*getWidth()/getNumStars() - rectangle.centerX(), getHeight()/2 - rectangle.centerY());
             canvas.drawPath(path, paintInside);
             canvas.drawPath(path, paintOutline);
         }
@@ -225,9 +225,8 @@ public class FlexibleRatingBar extends RatingBar {
             colorFillPressedOn = a.getInteger(R.styleable.FlexibleRatingBar_colorFillPressedOn, Color.rgb(0xFF,0xB7,0x4D));
             colorFillPressedOff = a.getInteger(R.styleable.FlexibleRatingBar_colorFillPressedOff, Color.TRANSPARENT);
             polygonVertices = a.getInteger(R.styleable.FlexibleRatingBar_polygonVertices, 5);
-            polygonRotation = 54 + a.getInteger(R.styleable.FlexibleRatingBar_polygonRotation, 0);
-            strokeWidth = a.getInteger(R.styleable.FlexibleRatingBar_strokeWidth, -50);
-            if(strokeWidth < 0) strokeWidth = null;
+            polygonRotation = a.getInteger(R.styleable.FlexibleRatingBar_polygonRotation, 0);
+            strokeWidth = (int) a.getDimension(R.styleable.FlexibleRatingBar_strokeWidth, -1);
         } finally {
             a.recycle();
         }
@@ -270,6 +269,11 @@ public class FlexibleRatingBar extends RatingBar {
     }
 
     public void setPolygonRotation(int polygonRotation) {
-        this.polygonRotation += polygonRotation;
+        this.polygonRotation = polygonRotation;
     }
+
+    public void setInteriorAngleModifier(float interiorAngleModifier) {
+        this.interiorAngleModifier = interiorAngleModifier;
+    }
+
 }

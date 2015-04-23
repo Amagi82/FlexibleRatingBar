@@ -44,8 +44,9 @@ public class MainActivity extends Activity {
         ratingBar3.setPolygonVertices(4);
         ratingBar3.setStrokeWidth(5);
         ratingBar4.setPolygonVertices(6);
-        ratingBar4.setColorFillOn(Color.rgb(111,63,182));
+        ratingBar4.setColorFillOn(Color.rgb(111, 63, 182));
         ratingBar4.setColorFillOff(Color.argb(55,145,122,235));
+        ratingBar5.setInteriorAngleModifier(1.5F);
     }
 
 

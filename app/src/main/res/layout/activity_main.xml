@@ -37,7 +37,7 @@
     <amagi82.flexibleratingbar.FlexibleRatingBar
         android:id="@+id/flexibleRatingBar2"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="25dp"
         android:numStars="5"
         android:rating="2.5"
         android:stepSize="0.5" />
@@ -73,6 +73,6 @@
         app:colorOutlineOn="@color/teal900"
         app:colorOutlinePressed="@color/teal500"
         app:polygonVertices="7"
-        app:strokeWidth="10"/>
+        app:strokeWidth="5dp"/>
 
 </LinearLayout>
