@@ -16,9 +16,7 @@ FlexibleRatingBar fixes all of that.
 
 FlexibleRatingBar should work all the way back to 2.3, and possibly earlier than that. To get started, add the following dependency to your `build.gradle`.
     
-    dependencies {
-        compile 'com.github.amagi82.flexibleratingbar:flexibleratingbar:1.1'
-    }
+    (currently getting this set up with maven/jcenter. will update when available)
     
 
 
