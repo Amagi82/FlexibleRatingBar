@@ -1,5 +1,5 @@
 # FlexibleRatingBar
-FlexibleRatingBar is an improved version of Android's default RatingBar that solves its many shortcomings. 
+FlexibleRatingBar is an improved version of Android's default RatingBar. 
 
 Want your rating bar to size itself appropriately to a given area? 
 Want it to comply when you tell it to display 5 stars and match_parent? 
