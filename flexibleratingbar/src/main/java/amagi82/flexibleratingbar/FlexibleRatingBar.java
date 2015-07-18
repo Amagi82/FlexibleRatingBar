@@ -42,13 +42,13 @@ public class FlexibleRatingBar extends RatingBar {
     private int polygonVertices = 5;
     private int polygonRotation = 0; //measured in degrees
     private int strokeWidth; //width of the outline
-    private Paint paintInside = new Paint();
-    private Paint paintOutline = new Paint();
+    private final Paint paintInside = new Paint();
+    private final Paint paintOutline = new Paint();
     private Path path = new Path();
-    private RectF rectangle = new RectF();
-    private Matrix matrix = new Matrix();
+    private final RectF rectangle = new RectF();
+    private final Matrix matrix = new Matrix();
     private float interiorAngleModifier = 2.2F;
-    private float dp = getResources().getDisplayMetrics().density;
+    private final float dp = getResources().getDisplayMetrics().density;
     private float starSize;
     private Bitmap colorsJoined;
 

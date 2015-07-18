@@ -5,7 +5,7 @@ android {
     buildToolsVersion "22.0.1"
     defaultConfig {
         applicationId "amagi82.flexibleratingbar"
-        minSdkVersion 9
+        minSdkVersion 4
         targetSdkVersion 22
         versionCode 3
         versionName '1.3'
