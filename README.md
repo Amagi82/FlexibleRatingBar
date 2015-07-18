@@ -1,19 +1,13 @@
 # FlexibleRatingBar
-FlexibleRatingBar is an improved version of Android's default RatingBar. 
+FlexibleRatingBar is an enhanced version of Android's default RatingBar. 
 
-Want your rating bar to size itself appropriately to a given area? 
-Want it to comply when you tell it to display 5 stars and match_parent? 
-Want to be able to easily change colors? 
-Want stars with more or fewer than 5 vertices? 
-Tired of it cutting off your stars, or introducing odd padding issues if you try to scale it? 
-
-FlexibleRatingBar fixes all of that.
+The default Android RatingBar scales very poorly, and requires custom drawables to do pretty much anything besides the default. FlexibleRatingBar creates polygons with however many vertices you want, and scales them to fit the the allotted space, so it scales properly and predictably. It also gives you a lot of flexibility with regards to color.
 
 ![](http://i.imgur.com/oAYAwB7.png)
 
 ## Including in your Project
 
-FlexibleRatingBar should work all the way back to 2.3, and possibly earlier than that. To get started, add the following dependency to your `build.gradle`.
+FlexibleRatingBar is compatible all the way back to API 4. To get started, add the following dependency to your `build.gradle`.
     
     (currently getting this set up with maven/jcenter. will update when available)
     
