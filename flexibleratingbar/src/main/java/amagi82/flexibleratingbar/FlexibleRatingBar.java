@@ -33,41 +33,53 @@ import android.widget.RatingBar;
 public class FlexibleRatingBar extends RatingBar {
 
     private int colorOutlineOn = Color.rgb(0x11, 0x11, 0x11);
-    private int colorOutlineOff = Color.rgb(0x61,0x61,0x61);
-    private int colorOutlinePressed = Color.rgb(0xFF,0xB7,0x4D);
-    private int colorFillOn = Color.rgb(0xFF,0x98,0x00);
+    private int colorOutlineOff = Color.rgb(0x61, 0x61, 0x61);
+    private int colorOutlinePressed = Color.rgb(0xFF, 0xB7, 0x4D);
+    private int colorFillOn = Color.rgb(0xFF, 0x98, 0x00);
     private int colorFillOff = Color.TRANSPARENT;
-    private int colorFillPressedOn = Color.rgb(0xFF,0xB7,0x4D);
+    private int colorFillPressedOn = Color.rgb(0xFF, 0xB7, 0x4D);
     private int colorFillPressedOff = Color.TRANSPARENT;
     private int polygonVertices = 5;
     private int polygonRotation = 0; //measured in degrees
     private int strokeWidth; //width of the outline
     private Paint paintInside = new Paint();
     private Paint paintOutline = new Paint();
-    private Bitmap colorsJoined;
     private Path path = new Path();
     private RectF rectangle = new RectF();
     private Matrix matrix = new Matrix();
     private float interiorAngleModifier = 2.2F;
     private float dp = getResources().getDisplayMetrics().density;
+    private float starSize;
+    private Bitmap colorsJoined;
 
-    public FlexibleRatingBar(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        getXmlAttrs(context, attrs);
+
+    public FlexibleRatingBar(Context context) {
+        this(context, null);
     }
 
     public FlexibleRatingBar(Context context, AttributeSet attrs) {
         super(context, attrs);
         getXmlAttrs(context, attrs);
+        init();
     }
 
-    public FlexibleRatingBar(Context context) {
-        super(context);
+    public FlexibleRatingBar(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        getXmlAttrs(context, attrs);
+        init();
+    }
+
+    private void init() {
+        paintInside.setAntiAlias(true);
+        paintOutline.setStrokeWidth(strokeWidth);
+        paintOutline.setStyle(Paint.Style.STROKE);
+        paintOutline.setStrokeJoin(Paint.Join.ROUND); //Remove this line to create pointy stars
+        paintOutline.setAntiAlias(true);
     }
 
     @Override
     protected synchronized void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int desiredWidth = (int)(50 * dp * getNumStars());
+        int desiredWidth = (int) (50 * dp * getNumStars());
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
@@ -94,11 +106,18 @@ public class FlexibleRatingBar extends RatingBar {
             height = heightSize;
         } else if (heightMode == MeasureSpec.AT_MOST) {
             //Can't be bigger than...
-            height = Math.min(heightSize, width/getNumStars());
+            height = Math.min(heightSize, width / getNumStars());
         } else {
             //Be whatever you want
-            height = width/getNumStars();
+            height = width / getNumStars();
         }
+
+        //If starSize matches getHeight, the tips of the star can get cut off due to strokeWidth being added to the polygon size.
+        //Make it a bit smaller to avoid this. Also decrease star size and spread them out rather than cutting them off if the
+        //height is insufficient for the width.
+        starSize = Math.min(height, width / getNumStars());
+        if (strokeWidth < 0) strokeWidth = (int) (starSize / 15);
+        starSize -= strokeWidth;
 
         //MUST CALL THIS
         setMeasuredDimension(width, height);
@@ -108,7 +127,7 @@ public class FlexibleRatingBar extends RatingBar {
     //If you enter 0 vertices, you get a circle
     private Path createStarBySize(float size, int steps) {
         //draw a simple circle if steps == 0
-        if(steps == 0){
+        if (steps == 0) {
             path.addOval(new RectF(0, 0, size, size), Path.Direction.CW);
             path.close();
             return path;
@@ -118,75 +137,61 @@ public class FlexibleRatingBar extends RatingBar {
         float degreesPerStep = (float) Math.toRadians(360.0F / (float) steps);
         float halfDegreesPerStep = degreesPerStep / 2.0F;
         path.setFillType(Path.FillType.EVEN_ODD);
-        float max = (float) (2.0F* Math.PI);
+        float max = (float) (2.0F * Math.PI);
         path.moveTo(halfSize, 0);
         for (double step = 0; step < max; step += degreesPerStep) {
-            path.lineTo((float)(halfSize - halfSize * Math.sin(step)), (float)(halfSize - halfSize * Math.cos(step)));
-            path.lineTo((float)(halfSize - radius * Math.sin(step + halfDegreesPerStep)), (float)(halfSize - radius * Math.cos(step + halfDegreesPerStep)));
+            path.lineTo((float) (halfSize - halfSize * Math.sin(step)), (float) (halfSize - halfSize * Math.cos(step)));
+            path.lineTo((float) (halfSize - radius * Math.sin(step + halfDegreesPerStep)), (float) (halfSize - radius * Math.cos(step + halfDegreesPerStep)));
         }
         path.close();
         return path;
     }
 
     @Override
-    public void onDraw(Canvas canvas) {
-
-        //If starSize matches getHeight, the tips of the star can get cut off due to strokeWidth being added to the polygon size.
-        //Make it a bit smaller to avoid this. Also decrease star size and spread them out rather than cutting them off if the
-        //height is insufficient for the width.
-        float starSize = Math.min(getHeight(), getWidth()/getNumStars());
-        if (strokeWidth < 0 ) strokeWidth = (int)(starSize/15);
-        starSize -= strokeWidth;
-
-        BitmapShader shaderFill = createShader(colorFillOn, colorFillOff);
-        BitmapShader shaderFillPressed = createShader(colorFillPressedOn, colorFillPressedOff);
-        paintInside.setAntiAlias(true);
-        paintOutline.setStrokeWidth(strokeWidth);
-        paintOutline.setStyle(Paint.Style.STROKE);
-        paintOutline.setStrokeJoin(Paint.Join.ROUND); //Remove this line to create pointy stars
-        paintOutline.setAntiAlias(true);
+    protected void onDraw(Canvas canvas) {
 
         //Default RatingBar changes color when pressed. This replicates the effect.
-        paintInside.setShader(isPressed()? shaderFillPressed : shaderFill);
+        BitmapShader shaderFill = updateShader(colorFillOn, colorFillOff);
+        BitmapShader shaderFillPressed = updateShader(colorFillPressedOn, colorFillPressedOff);
+        paintInside.setShader(isPressed() ? shaderFillPressed : shaderFill);
 
         path.rewind();
         path = createStarBySize(starSize, polygonVertices);
 
         //Rotate star if desired, and resize to fit the available area. Height and width may change during rotation.
         //Other shapes may not be in desirable orientations, but you can rotate them with setPolygonRotation
-        path.computeBounds(rectangle,  true);
-        float maxDimension = Math.max(rectangle.height(), rectangle.width());
-        matrix.setScale(starSize / (1.15F * maxDimension), starSize / (1.15F * maxDimension));
-        if(polygonRotation != 0) matrix.preRotate(polygonRotation);
-        path.transform(matrix);
+        if (polygonRotation != 0) {
+            path.computeBounds(rectangle, true);
+            float maxDimension = Math.max(rectangle.height(), rectangle.width());
+            matrix.setScale(starSize / (1.15F * maxDimension), starSize / (1.15F * maxDimension));
+            matrix.preRotate(polygonRotation);
+            path.transform(matrix);
+        }
 
-        for (int i=0;i<getNumStars();++i) {
+        for (int i = 0; i < getNumStars(); ++i) {
             //Default RatingBar only shows fractions in the interior, not the outline.
-            paintOutline.setColor(isPressed()?  colorOutlinePressed : i<getRating()? colorOutlineOn : colorOutlineOff);
+            paintOutline.setColor(isPressed() ? colorOutlinePressed : i < getRating() ? colorOutlineOn : colorOutlineOff);
 
-            path.computeBounds(rectangle,  true);
-            path.offset((i+.5F)*getWidth()/getNumStars() - rectangle.centerX(), getHeight()/2 - rectangle.centerY());
+            path.computeBounds(rectangle, true);
+            path.offset((i + .5F) * getWidth() / getNumStars() - rectangle.centerX(), getHeight() / 2 - rectangle.centerY());
             canvas.drawPath(path, paintInside);
             canvas.drawPath(path, paintOutline);
         }
     }
 
     //Create a BitmapShader, which is used to show fractions of stars
-    private BitmapShader createShader(int colorOn, int colorOff){
+    private BitmapShader updateShader(int colorOn, int colorOff) {
 
         //Bitmap of width 0 will cause a crash. Make sure it's a positive number.
-        int ratingWidth = (int)(getRating()*getWidth()/getNumStars());
+        int ratingWidth = (int) (getRating() * getWidth() / getNumStars());
 
-        if(ratingWidth <= 0){
+        if (ratingWidth <= 0 || getWidth() - ratingWidth <= 0) {
             colorsJoined = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-            colorsJoined.eraseColor(colorOff);
-        }else if(getWidth()-ratingWidth <= 0){
-            colorsJoined = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-            colorsJoined.eraseColor(colorOn);
-        }else {
+            colorsJoined.eraseColor(ratingWidth <= 0 ? colorOff : colorOn);
+        } else {
             Bitmap colorLeft = Bitmap.createBitmap(ratingWidth, getHeight(), Bitmap.Config.ARGB_8888);
-            Bitmap colorRight = Bitmap.createBitmap(getWidth() - ratingWidth, getHeight(), Bitmap.Config.ARGB_8888);
             colorLeft.eraseColor(colorOn);
+            Bitmap colorRight = Bitmap.createBitmap(getWidth() - ratingWidth, getHeight(), Bitmap.Config.ARGB_8888);
             colorRight.eraseColor(colorOff);
             colorsJoined = combineBitmaps(colorLeft, colorRight);
         }
@@ -209,11 +214,11 @@ public class FlexibleRatingBar extends RatingBar {
         TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.FlexibleRatingBar, 0, 0);
         try {
             colorOutlineOn = a.getInteger(R.styleable.FlexibleRatingBar_colorOutlineOn, Color.rgb(0x11, 0x11, 0x11));
-            colorOutlineOff = a.getInteger(R.styleable.FlexibleRatingBar_colorOutlineOff, Color.rgb(0x61,0x61,0x61));
-            colorOutlinePressed = a.getInteger(R.styleable.FlexibleRatingBar_colorOutlinePressed, Color.rgb(0xFF,0xB7,0x4D));
-            colorFillOn = a.getInteger(R.styleable.FlexibleRatingBar_colorFillOn, Color.rgb(0xFF,0x98,0x00));
+            colorOutlineOff = a.getInteger(R.styleable.FlexibleRatingBar_colorOutlineOff, Color.rgb(0x61, 0x61, 0x61));
+            colorOutlinePressed = a.getInteger(R.styleable.FlexibleRatingBar_colorOutlinePressed, Color.rgb(0xFF, 0xB7, 0x4D));
+            colorFillOn = a.getInteger(R.styleable.FlexibleRatingBar_colorFillOn, Color.rgb(0xFF, 0x98, 0x00));
             colorFillOff = a.getInteger(R.styleable.FlexibleRatingBar_colorFillOff, Color.TRANSPARENT);
-            colorFillPressedOn = a.getInteger(R.styleable.FlexibleRatingBar_colorFillPressedOn, Color.rgb(0xFF,0xB7,0x4D));
+            colorFillPressedOn = a.getInteger(R.styleable.FlexibleRatingBar_colorFillPressedOn, Color.rgb(0xFF, 0xB7, 0x4D));
             colorFillPressedOff = a.getInteger(R.styleable.FlexibleRatingBar_colorFillPressedOff, Color.TRANSPARENT);
             polygonVertices = a.getInteger(R.styleable.FlexibleRatingBar_polygonVertices, 5);
             polygonRotation = a.getInteger(R.styleable.FlexibleRatingBar_polygonRotation, 0);
