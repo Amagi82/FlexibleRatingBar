@@ -1,10 +1,9 @@
 # FlexibleRatingBar
 FlexibleRatingBar is an improved version of Android's default RatingBar. 
 
-
 Want your rating bar to size itself appropriately to a given area? 
-Want it to actually listen when you tell it to display 5 stars and match_parent? 
-Want to be able to easily change the color? 
+Want it to comply when you tell it to display 5 stars and match_parent? 
+Want to be able to easily change colors? 
 Want stars with more or fewer than 5 vertices? 
 Tired of it cutting off your stars, or introducing odd padding issues if you try to scale it? 
 
@@ -41,7 +40,7 @@ FlexibleRatingBar should work all the way back to 2.3, and possibly earlier than
   app:polygonRotation="0"
   app:strokeWidth="5dp"/>
 ```
-Simply add `<amagi82.flexibleratingbar.FlexibleRatingBar/>` to your layout, and use the same as you would any other widget. 
+Add `<amagi82.flexibleratingbar.FlexibleRatingBar/>` to your layout, and use the same as you would any other widget. 
 `layout_width` and `layout_height` will scale the rating bar appropriately. 
 In addition, you can alter any of the above settings in xml, or do it in code. 
 The colors should be self-explanitory. `polygonVertices` is the number of points on your star. 
